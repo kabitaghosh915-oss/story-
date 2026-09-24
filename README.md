@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>অমূল্য গল্পের ঝুড়ি | OmniTales</title>
+    <title> Indian Ka eSahitya </title>
     
 
 <!doctype html>
