@@ -5,239 +5,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>অমূল্য গল্পের ঝুড়ি | OmniTales</title>
     
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
-    <style>
-        /* --- CSS VARIABLES & RESET --- */
-        :root {
-            --bg-color: #080810;
-            --card-bg: rgba(20, 20, 35, 0.6);
-            --text-color: #e0e0e0;
-            --muted-color: #94a3b8;
-            --accent-cyan: #00f2fe;
-            --accent-purple: #4facfe;
-            --border-color: rgba(255, 255, 255, 0.08);
-            --glass: blur(20px) saturate(180%);
-            --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            --font-bengali: 'Nirmala UI', 'Kalpurush', sans-serif; /* Fallback system fonts */
-            --header-height: 60px;
-            --nav-height: 65px;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: var(--font-main);
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            overflow-x: hidden;
-            padding-top: var(--header-height);
-            padding-bottom: var(--nav-height);
-            line-height: 1.6;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        /* --- SCROLLBAR --- */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg-color); }
-        ::-webkit-scrollbar-thumb { background: var(--accent-purple); border-radius: 3px; }
-
-        /* --- UTILITIES --- */
-        .container { width: 92%; max-width: 1200px; margin: 0 auto; }
-        .hidden { display: none !important; }
-        .GlassMorphism {
-            background: var(--card-bg);
-            -webkit-backdrop-filter: var(--glass);
-            backdrop-filter: var(--glass);
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
-        }
-        .btn {
-            padding: 10px 20px;
-            border-radius: 50px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
-            color: white;
-        }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4); }
-        .btn-secondary { background: rgba(255,255,255,0.05); color: var(--text-color); border: 1px solid var(--border-color); }
-        .btn-secondary:hover { background: rgba(255,255,255,0.1); }
-        .section-title { font-size: 1.8rem; margin-bottom: 1.5rem; background: linear-gradient(to right, #fff, var(--muted-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-block;}
-        
-        /* --- HEADER --- */
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: var(--header-height);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            background: rgba(8, 8, 16, 0.8);
-            -webkit-backdrop-filter: blur(10px);
-            backdrop-filter: blur(10px);
-        }
-        .header .container { display: flex; justify-content: space-between; align-items: center; }
-        .logo {
-            font-size: 1.3rem;
-            font-weight: 800;
-            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-decoration: none;
-            font-family: var(--font-bengali);
-        }
-
-        /* --- MAIN CONTENT AREA --- */
-        main { flex: 1; padding: 20px 0; }
-        .tab-view { display: none; opacity: 0; transition: opacity 0.3s ease; }
-        .tab-view.active { display: block; opacity: 1; }
-
-        /* --- TAB 1: LIBRARY --- */
-        #hero { text-align: center; padding: 40px 0; margin-bottom: 20px; border-radius: 20px; position: relative; overflow: hidden; }
-        #hero::before {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(79, 172, 254, 0.1) 0%, rgba(8, 8, 16, 0) 70%);
-            z-index: -1;
-        }
-        #hero h1 { font-size: 2.5rem; margin-bottom: 10px; font-family: var(--font-bengali); }
-        #hero p { color: var(--muted-color); max-width: 600px; margin: 0 auto 20px; font-size: 1rem; }
-        
-        .controls-bar {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 20px; gap: 15px; flex-wrap: wrap; padding: 10px; border-radius: 10px;
-        }
-        .filter-group { display: flex; gap: 10px; flex-wrap: wrap; }
-        .sort-select {
-            padding: 8px 15px; border-radius: 8px; background: var(--card-bg);
-            border: 1px solid var(--border-color); color: var(--text-color); outline: none; cursor: pointer;
-        }
-        .sort-select option { background: #080810; }
-
-        .story-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-        }
-        .story-card {
-            border-radius: 16px; overflow: hidden; cursor: pointer;
-            display: flex; flex-direction: column; transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 1px solid var(--border-color); position: relative; background: var(--card-bg);
-        }
-        .story-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .card-cover { width: 100%; height: 140px; background-size: cover; background-position: center; border-bottom: 1px solid var(--border-color); }
-        .card-body { padding: 15px; flex: 1; display: flex; flex-direction: column; }
-        .card-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 5px; font-family: var(--font-bengali); line-height: 1.3; }
-        .card-author { font-size: 0.85rem; color: var(--accent-cyan); margin-bottom: 8px; }
-        .card-meta {
-            margin-top: auto; padding-top: 10px; border-top: 1px solid var(--border-color);
-            display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--muted-color);
-        }
-        .card-stats { display: flex; gap: 10px; align-items: center; }
-        .icon-stat { display: inline-flex; align-items: center; gap: 4px; }
-
-        /* --- READER VIEW --- */
-        #reader-view {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-color); z-index: 2000; overflow-y: auto;
-            display: none; padding: 20px;
-        }
-        #reader-view.active { display: block; }
-        .reader-container { max-width: 800px; margin: 0 auto; padding-bottom: 100px; }
-        
-        .reader-header {
-            margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color);
-            position: sticky; top: 0; background: var(--bg-color); padding-top: 10px; z-index: 10;
-        }
-        .reader-title { font-size: 2.5rem; margin-bottom: 10px; font-family: var(--font-bengali); }
-        .reader-info { display: flex; justify-content: space-between; color: var(--muted-color); font-size: 0.9rem; flex-wrap: wrap; gap: 10px;}
-        
-        #reader-content {
-            font-size: 1.1rem; line-height: 1.8; color: var(--text-color);
-            font-family: var(--font-bengali), serif; /* Prefer serif for reading */
-            /* Anti-Copy */
-            -webkit-user-select: none; /* Safari */
-            -ms-user-select: none; /* IE 10+ and Edge */
-            user-select: none;      
-        }
-        #reader-content p { margin-bottom: 1.5em; text-align: justify; }
-
-        .reader-tools-floating {
-            position: fixed; bottom: 90px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 100;
-        }
-        .tool-btn {
-            width: 45px; height: 45px; border-radius: 50%; border: none; cursor: pointer;
-            background: var(--card-bg); color: white; font-size: 1.2rem; display: grid; place-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px);
-            border: 1px solid var(--border-color); transition: all 0.2s;
-        }
-        .tool-btn:hover { background: rgba(255,255,255,0.1); transform: scale(1.05); }
-
-        .action-bar {
-            margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border-color);
-            display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap;
-        }
-        .star-rating { display: flex; flex-direction: row-reverse; gap: 5px; cursor: pointer; }
-        .star-rating input { display: none; }
-        .star-rating label { font-size: 1.8rem; color: #444; transition: color 0.2s; }
-        .star-rating input:checked ~ label,
-        .star-rating label:hover,
-        .star-rating label:hover ~ label { color: #ffc107; }
-        
-        .like-btn {
-            display: inline-flex; align-items: center; gap: 8px;
-            padding: 10px 25px; border-radius: 50px; background: rgba(255,255,255,0.05);
-            border: 1px solid var(--border-color); color: var(--muted-color); cursor: pointer; transition: all 0.3s;
-        }
-        .like-btn:hover { background: rgba(255,255,255,0.1); color: #ff4757; }
-        .like-btn.liked { background: rgba(255, 71, 87, 0.1); color: #ff4757; border-color: rgba(255, 71, 87, 0.3); }
-        
-        .support-modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8);
-            display: grid; place-items: center; z-index: 3000; opacity: 0; visibility: hidden; transition: all 0.3s;
-        }
-        .support-modal-overlay.active { opacity: 1; visibility: visible; }
-        .support-modal {
-            padding: 30px; border-radius: 20px; text-align: center; max-width: 350px; width: 90%;
-            transform: scale(0.8); transition: all 0.3s;
-        }
-        .support-modal-overlay.active .support-modal { transform: scale(1); }
-        .support-modal h3 { margin-bottom: 15px; }
-        .support-modal p { color: var(--muted-color); font-size: 0.9rem; margin-bottom: 20px; }
-        .upi-box {
-            background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px;
-            font-family: monospace; font-size: 1.1rem; color: var(--accent-cyan);
-            border: 1px solid var(--border-color); margin-bottom: 15px; user-select: all;
-        }
-        .qr-placeholder {
-            width: 150px; height: 150px; background: white; margin: 0 auto 15px;
-            display: grid; place-items: center; color: black; font-weight: bold; border-radius: 10px;
-        }
-
-        /* --- TAB 2: WRITER --- */
-        .writer-form { display: flex; flex-direction: column; gap: 20px; max-width: 800px; margin: 0 auto; }
-        .form-group { display: flex; flex-direction: column; gap: 8px; }
-        .form-label { font-weight: 600; color: var(--text-color); font-size: 0.95rem; }
-        .form-input, .form-textarea {
-            padding: 12px; border-radius: 10px; background: var(--card-bg);
-            border: 1px solid var(--border-color); color: var(--text-color);
-            font-size: 1rem; outline: none; transition: border-color 0.3s;
-            font-family: inherit;
-        }
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#080810">
+  <meta name="description" content="অমূল্য গল্পের ঝুড়ি — OmniTales বাংলা গল্পের লাইব্রেরি">
+  <title>অমূল্য গল্পের ঝুড়ি | OmniTales</title>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <style>
+    :root{--bg:#080810;--panel:rgba(20,20,35,.72);--panel2:rgba(255,255,255,.06);--text:#edf2f7;--muted:#94a3b8;--cyan:#00f2fe;--purple:#8b5cf6;--pink:#ff4d8d;--border:rgba(255,255,255,.1);--shadow:0 14px 45px rgba(0,0,0,.35);--font:Inter,"Segoe UI",Roboto,Arial,sans-serif;--bn:"Nirmala UI","Kalpurush",sans-serif}
+    *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}body{min-height:100vh;background:radial-gradient(circle at 12% 0%,#15213b 0,transparent 30%),radial-gradient(circle at 100% 30%,#241038 0,transparent 30%),var(--bg);color:var(--text);font-family:var(--font);line-height:1.6;padding:76px 0 88px}button,input,textarea,select{font:inherit}button{cursor:pointer}a{color:inherit}.bn{font-family:var(--bn)}.container{width:min(1160px,92%);margin:auto}.glass{background:var(--panel);border:1px solid var(--border);box-shadow:var(--shadow);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}.muted{color:var(--muted)}.hidden{display:none!important}.btn{border:0;border-radius:999px;padding:11px 18px;font-weight:700;transition:.2s;color:var(--text)}.btn:hover{transform:translateY(-2px)}.primary{background:linear-gradient(135deg,var(--purple),var(--cyan));box-shadow:0 8px 25px #00c8df33}.secondary{background:var(--panel2);border:1px solid var(--border)}.danger{background:#ef444422;color:#ff9ba9;border:1px solid #ef444455}
+    .topbar{height:64px;position:fixed;z-index:20;inset:0 0 auto;background:#080810cc;border-bottom:1px solid var(--border);backdrop-filter:blur(16px)}.topbar .container{height:100%;display:flex;align-items:center;justify-content:space-between}.brand{text-decoration:none;font-size:1.22rem;font-weight:900;font-family:var(--bn);background:linear-gradient(90deg,var(--cyan),#b18cff);-webkit-background-clip:text;color:transparent}.status{font-size:.75rem;color:var(--muted);display:flex;gap:7px;align-items:center}.dot{width:8px;height:8px;border-radius:50%;background:#f59e0b}.dot.online{background:#22c55e}
+    main{min-height:calc(100vh - 150px);padding:24px 0}.view{display:none}.view.active{display:block;animation:rise .25s ease}@keyframes rise{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .hero{padding:42px 24px;text-align:center;border-radius:28px;overflow:hidden;position:relative;margin-bottom:24px}.hero:before{content:"";position:absolute;width:320px;height:320px;background:#00e5ff22;filter:blur(70px);left:50%;top:-190px;transform:translateX(-50%)}.hero>*{position:relative}.eyebrow{color:var(--cyan);letter-spacing:.15em;font-size:.75rem;font-weight:800}.hero h1{font:900 clamp(2rem,7vw,4.2rem)/1.2 var(--bn);margin:10px 0}.hero p{max-width:650px;margin:0 auto 20px;color:var(--muted)}.hero-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}.section-heading{display:flex;align-items:end;justify-content:space-between;gap:15px;margin:24px 0 15px}.section-heading h2{font:800 1.65rem var(--bn)}.controls{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;padding:12px;border-radius:16px;margin-bottom:18px}.search,.select,.field{width:100%;background:#0b0b16;color:var(--text);border:1px solid var(--border);border-radius:11px;padding:11px 13px;outline:none}.search:focus,.select:focus,.field:focus,.area:focus{border-color:var(--cyan);box-shadow:0 0 0 3px #00f2fe18}.search{max-width:330px}.select{width:auto;min-width:190px}.story-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:17px}.card{overflow:hidden;border-radius:18px;display:flex;flex-direction:column;min-height:290px;transition:.22s;cursor:pointer}.card:hover{transform:translateY(-5px);border-color:#00f2fe66}.cover{height:130px;background:linear-gradient(135deg,#182d48,#30183e);background-size:cover;background-position:center;display:grid;place-items:center;color:#ffffffbb;font-size:2.5rem}.card-body{padding:15px;display:flex;flex-direction:column;gap:5px;flex:1}.card h3{font:800 1.2rem/1.35 var(--bn)}.author{color:var(--cyan);font-size:.84rem}.meta{margin-top:auto;border-top:1px solid var(--border);padding-top:10px;color:var(--muted);display:flex;justify-content:space-between;font-size:.78rem}.stars{color:#ffc857;letter-spacing:1px}.empty{text-align:center;padding:45px;color:var(--muted);border-radius:18px}
+    .form-shell{max-width:850px;margin:auto;padding:24px;border-radius:22px}.form-shell h1,.profile h1{font:800 2rem var(--bn);margin-bottom:6px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:17px}.group{display:flex;flex-direction:column;gap:7px}.group.full{grid-column:1/-1}.label{font-weight:700;font-size:.9rem}.area{min-height:260px;resize:vertical}.metrics{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:.84rem}.preview{width:100%;max-height:180px;object-fit:cover;border-radius:12px;border:1px solid var(--border);margin-top:8px}.form-actions{display:flex;justify-content:flex-end;gap:10px;align-items:center;margin-top:8px}
+    .profile{max-width:900px;margin:auto}.profile-head{display:flex;justify-content:space-between;gap:15px;align-items:center;padding:22px;border-radius:20px;margin:18px 0}.avatar{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--purple),var(--cyan));font-size:1.5rem;font-weight:900}.identity{display:flex;align-items:center;gap:14px}.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.panel{padding:20px;border-radius:18px}.panel h2{font:700 1.25rem var(--bn);margin-bottom:12px}.list{display:grid;gap:8px}.list-item{padding:11px;border:1px solid var(--border);border-radius:11px;display:flex;justify-content:space-between;gap:10px;color:var(--muted)}
+    #reader{position:fixed;inset:0;background:#080810f7;z-index:50;overflow:auto;padding:18px 0 100px;display:none}.reader-inner{width:min(800px,92%);margin:auto}.reader-head{position:sticky;top:0;padding:12px 0 17px;background:#080810f2;border-bottom:1px solid var(--border);z-index:2}.reader-head-row{display:flex;justify-content:space-between;gap:12px;align-items:start}.reader-head h1{font:900 clamp(1.8rem,6vw,3rem)/1.2 var(--bn)}.reader-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.reader-content{font:1.15rem/2 var(--bn);padding:28px 0;user-select:none;-webkit-user-select:none}.reader-content p{margin-bottom:1.35em;text-align:justify}.reader-actions{border-top:1px solid var(--border);padding-top:20px;display:flex;justify-content:center;gap:15px;align-items:center;flex-wrap:wrap}.rating{display:flex;flex-direction:row-reverse;gap:2px}.rating button{font-size:1.75rem;background:none;border:0;color:#475569}.rating button.active,.rating button:hover,.rating button:hover~button{color:#ffc857}.like{border:1px solid var(--border);background:var(--panel2);color:var(--muted);border-radius:999px;padding:11px 19px}.like.liked{color:#ff6681;border-color:#ff668166;background:#ff47711c}
+    .modal{position:fixed;inset:0;background:#000b;display:none;place-items:center;z-index:70;padding:18px}.modal.open{display:grid}.modal-box{width:min(410px,100%);padding:25px;border-radius:22px;text-align:center}.modal-box h2{font-family:var(--bn);margin-bottom:6px}.modal-box p{color:var(--muted);font-size:.9rem;margin-bottom:16px}.upi{padding:13px;border-radius:10px;background:#0007;color:var(--cyan);font-family:monospace;font-size:1.1rem;margin:12px 0}.qr{width:150px;height:150px;margin:12px auto;background:repeating-linear-gradient(45deg,#111 0 4px,#fff 4px 8px),repeating-linear-gradient(-45deg,transparent 0 6px,#111 6px 10px);border:8px solid white;border-radius:8px}.auth-box{max-width:430px;margin:40px auto;padding:24px;border-radius:20px}.auth-box h2{font:800 1.7rem var(--bn);margin-bottom:14px}.auth-box form{display:grid;gap:12px}.notice{padding:12px;border-radius:10px;background:#00f2fe12;color:var(--muted);font-size:.85rem}.bottom-nav{height:70px;position:fixed;z-index:20;bottom:0;inset-inline:0;background:#0b0b15ee;border-top:1px solid var(--border);backdrop-filter:blur(18px);display:flex;justify-content:center;gap:5px}.nav-btn{flex:1;max-width:180px;background:none;border:0;color:var(--muted);font-size:.73rem;display:grid;place-items:center;gap:1px}.nav-btn span:first-child{font-size:1.25rem}.nav-btn.active{color:var(--cyan)}.toast{position:fixed;z-index:100;bottom:84px;left:50%;transform:translateX(-50%) translateY(20px);opacity:0;padding:11px 16px;border-radius:999px;background:#172033;color:white;border:1px solid var(--border);transition:.25s;pointer-events:none}.toast.show{opacity:1;transform:translateX(-50%)}
+    @media(max-width:650px){.form-grid,.profile-grid{grid-template-columns:1fr}.group.full{grid-column:auto}.hero{padding:32px 17px}.controls{align-items:stretch}.search,.select{max-width:none;width:100%}.reader-content{font-size:1.08rem}.profile-head{align-items:flex-start;flex-direction:column}.profile-head .btn{width:100%}}
+  </style>
+</head>
+<body>
+<header class="topbar"><div class="container"><a class="brand" href="#home">অমূল্য গল্পের ঝুড়ি</a><div class="status"><i class="dot" id="connection-dot"></i><span id="connection-label">লোকাল মোড</span></div></div></header>
+<main class="container">
+  <section id="home" class="view active">
+    <div class="hero glass"><div class="eyebrow">OMNITALES · BANGLA STORYVERSE</div><h1>আপনার কল্পনার<br>অমূল্য গল্পের ঝুড়ি</h1><p>পড়ুন, লিখুন এবং নিজের গল্প সবার সঙ্গে ভাগ করে নিন—একটি শান্ত, দ্রুত ও সৃজনশীল পাঠভুবনে।</p><div class="hero-actions"><button class="btn primary" data-route="writer">গল্প লিখুন ✦</button><button class="btn secondary" data-route="profile">মাই আইডি</button></div></div>
+    <div class="section-heading"><h2 class="bn">জনপ্রিয় গল্পসমূহ</h2><span class="muted" id="story-count"></span></div>
+    <div class="controls glass"><input class="search" id="search" type="search" placeholder="গল্প বা লেখক খুঁজুন…" aria-label="গল্প খুঁজুন"><select class="select" id="sort" aria-label="সাজানোর নিয়ম"><option value="rating">সেরা রেটিং</option><option value="newest">নতুন প্রকাশনা</option><option value="likes">সর্বাধিক লাইক</option><option value="views">সর্বাধিক ভিউ</option></select></div>
+    <div id="story-grid" class="story-grid"></div>
+  </section>
+  <section id="writer" class="view"><div class="form-shell glass"><h1>রাইটিং স্টুডিও</h1><p class="muted">আপনার পরবর্তী অমূল্য গল্পটি প্রকাশ করুন।</p><form id="story-form" class="writer-form"><div class="form-grid"><div class="group"><label class="label" for="title">গল্পের নাম *</label><input class="field" id="title" required maxlength="120" placeholder="যেমন: নীল জোছনা"></div><div class="group"><label class="label" for="chapter">চ্যাপ্টার নম্বর *</label><input class="field" id="chapter" required type="number" min="1" value="1"></div><div class="group"><label class="label" for="category">বিভাগ / জনরা</label><input class="field" id="category" maxlength="40" placeholder="রোমান্স, রহস্য…"></div><div class="group"><label class="label" for="cover-url">বুক কভার URL</label><input class="field" id="cover-url" type="url" placeholder="https://…"></div><div class="group full"><label class="label" for="cover-file">অথবা কভার ফাইল</label><input class="field" id="cover-file" type="file" accept="image/*"><img id="cover-preview" class="preview hidden" alt="কভার প্রিভিউ"></div><div class="group full"><label class="label" for="body">মূল লেখার টেক্সট *</label><textarea class="field area" id="body" required maxlength="100000" placeholder="এখানেই আপনার গল্প লিখুন…"></textarea><div class="metrics"><span id="word-count">শব্দ: ০</span><span id="read-time">পড়তে সময়: ০ মিনিট</span></div></div></div><div class="form-actions"><span class="muted" id="publish-hint"></span><button class="btn primary" type="submit">গল্প প্রকাশ করুন ↗</button></div></form></div></section>
+  <section id="profile" class="view"><div class="profile"><h1>মাই আইডি</h1><p class="muted">আপনার পাঠ ও সৃষ্টির ব্যক্তিগত ড্যাশবোর্ড।</p><div id="auth-area"></div><div id="profile-data" class="hidden"><div class="profile-head glass"><div class="identity"><div class="avatar" id="avatar">ও</div><div><strong id="profile-name"></strong><div class="muted" id="profile-email"></div></div></div><button class="btn danger" id="logout">লগআউট</button></div><div class="profile-grid"><div class="panel glass"><h2>আমার প্রকাশনা</h2><div id="my-stories" class="list"></div></div><div class="panel glass"><h2>সেভ করা বুকমার্ক</h2><div id="bookmarks" class="list"></div></div></div></div></div></section>
+</main>
+<nav class="bottom-nav" aria-label="প্রধান নেভিগেশন"><button class="nav-btn active" data-route="home"><span>⌂</span><span>হোম</span></button><button class="nav-btn" data-route="writer"><span>✎</span><span>লিখুন</span></button><button class="nav-btn" data-route="profile"><span>◎</span><span>মাই আইডি</span></button></nav>
+<section id="reader" aria-hidden="true"><div class="reader-inner"><header class="reader-head"><div class="reader-head-row"><div><h1 id="reader-title"></h1><div class="muted" id="reader-info"></div></div><button class="btn secondary" id="close-reader" aria-label="রিডার বন্ধ করুন">✕</button></div><div class="reader-tools"><button class="btn secondary" id="font-down">A−</button><button class="btn secondary" id="font-up">A+</button><button class="btn secondary" id="bookmark">🔖 সেভ</button><button class="btn secondary" id="support">☕ সাপোর্ট করুন</button></div></header><article id="reader-content" class="reader-content"></article><div class="reader-actions"><div class="rating" id="rating" aria-label="রেটিং"></div><button class="like" id="like">♡ <span>লাইক</span> <b>0</b></button></div></div></section>
+<div class="modal" id="support-modal"><div class="modal-box glass"><h2>☕ স্রষ্টাকে সাপোর্ট করুন</h2><p>আপনার ছোট্ট সহায়তা আরও সুন্দর গল্প তৈরিতে অনুপ্রেরণা দেয়।</p><div class="qr" aria-label="UPI QR placeholder"></div><div class="upi">creator@upi</div><button class="btn secondary" id="close-support">বন্ধ করুন</button></div></div><div id="toast" class="toast"></div>
+<script>
+'use strict';
+const firebaseConfig={apiKey:'YOUR_API_KEY',authDomain:'YOUR_AUTH_DOMAIN',projectId:'YOUR_PROJECT_ID',storageBucket:'YOUR_STORAGE_BUCKET',messagingSenderId:'YOUR_MESSAGING_SENDER_ID',appId:'YOUR_APP_ID'};
+const seeded=[{id:'welcome',title:'জোছনার শেষ ট্রেন',chapter:1,category:'কল্পকাহিনি',author:'OmniTales',body:'রাতের শেষ ট্রেনটি যখন স্টেশনে ঢুকল, মেঘলা জানত—আজকের যাত্রা অন্য সব দিনের মতো নয়।\n\nজানালার ওপারে নদীটি চাঁদের আলোয় রুপালি হয়ে ছিল। সে ��্যাগ থেকে পুরোনো চিঠিটা বের করল এবং প্রথমবারের মতো শেষ লাইনটি পড়ল।',cover:'',createdAt:'2025-01-12T18:00:00.000Z',likes:24,views:86,ratingTotal:42,ratingCount:10,authorUid:''}];
+const state={stories:[],user:null,current:null,fontSize:1.15,liked:false};
+const $=s=>document.querySelector(s); const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const configured=!Object.values(firebaseConfig).some(v=>String(v).startsWith('YOUR_')); let db=null,auth=null;
+if(configured&&navigator.onLine&&window.firebase){try{firebase.initializeApp(firebaseConfig);auth=firebase.auth();db=firebase.firestore();auth.onAuthStateChanged(u=>{state.user=u;renderAuth();renderProfile();});$('#connection-label').textContent='Firebase সংযুক্ত';$('#connection-dot').classList.add('online')}catch(e){console.warn(e)}}
+const store={get(){try{return JSON.parse(localStorage.getItem('omnitales-stories')||'[]')}catch{return[]}},set(v){localStorage.setItem('omnitales-stories',JSON.stringify(v))},bookmarks(){try{return JSON.parse(localStorage.getItem('omnitales-bookmarks')||'[]')}catch{return[]}},saveBookmarks(v){localStorage.setItem('omnitales-bookmarks',JSON.stringify(v))}};
+function notify(message){const t=$('#toast');t.textContent=message;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400)}
+function date(v){return new Intl.DateTimeFormat('bn-BD',{dateStyle:'medium',timeStyle:'short'}).format(new Date(v))} function words(s){return String(s).trim()?String(s).trim().split(/\s+/).length:0} function stars(s){return '★'.repeat(Math.round(s||0))+'☆'.repeat(5-Math.round(s||0))}
+async function loadStories(){let local=store.get();if(!local.length){local=seeded;store.set(local)}state.stories=local;if(db){try{const snap=await db.collection('stories').orderBy('createdAt','desc').get();const remote=snap.docs.map(d=>({id:d.id,...d.data()}));state.stories=remote.length?remote:local;renderStories()}catch(e){console.warn('Firestore unavailable',e)}}renderStories()}
+function average(s){return s.ratingCount?Math.min(5,s.ratingTotal/s.ratingCount):0} function sorted(){const q=$('#search').value.toLowerCase();let a=state.stories.filter(s=>(s.title+' '+s.author+' '+(s.category||'')).toLowerCase().includes(q));const key=$('#sort').value;a.sort((x,y)=>key==='newest'?new Date(y.createdAt)-new Date(x.createdAt):key==='likes'?(y.likes||0)-(x.likes||0):key==='views'?(y.views||0)-(x.views||0):(average(y)-average(x))||((y.likes||0)-(x.likes||0)));return a}
+function renderStories(){const a=sorted();$('#story-count').textContent=`${a.length.toLocaleString('bn-BD')}টি গল্প`;$('#story-grid').innerHTML=a.length?a.map(s=>`<article class="card glass" data-id="${esc(s.id)}"><div class="cover" style="${s.cover?`background-image:url('${esc(s.cover)}')`:''}">${s.cover?'':'✦'}</div><div class="card-body"><h3>${esc(s.title)}</h3><div class="author">${esc(s.author||'অজ্ঞাত লেখক')} · ${esc(s.category||'সাধারণ')}</div><div class="muted">চ্যাপ্টার ${esc(s.chapter||1)} · ${date(s.createdAt)}</div><div class="meta"><span class="stars">${stars(average(s))} ${average(s).toFixed(1)}</span><span>♡ ${Number(s.likes||0).toLocaleString('bn-BD')} · 👁 ${Number(s.views||0).toLocaleString('bn-BD')}</span></div></div></article>`).join(''):`<div class="empty glass">কোনও গল্প পাওয়া যায়নি। প্রথম গল্পটি আপনিই লিখুন!</div>`}
+function route(name){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===name));document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.route===name));history.replaceState(null,'','#'+name);if(name==='profile')renderProfile();window.scrollTo({top:0,behavior:'smooth'})}
+function openReader(id){const s=state.stories.find(x=>x.id===id);if(!s)return;state.current=s;state.liked=JSON.parse(localStorage.getItem('liked-'+id)||'false');s.views=(s.views||0)+1;store.set(state.stories);$('#reader-title').textContent=s.title;$('#reader-info').textContent=`${s.author||'অজ্ঞাত লেখক'} · চ্যাপ্টার ${s.chapter||1} · প্রকাশিত ${date(s.createdAt)}`;$('#reader-content').innerHTML=String(s.body).split(/\n+/).filter(Boolean).map(p=>`<p>${esc(p)}</p>`).join('');$('#reader-content').style.fontSize=state.fontSize+'rem';$('#like').classList.toggle('liked',state.liked);$('#like').innerHTML=`${state.liked?'♥':'♡'} <span>লাইক</span> <b>${Number(s.likes||0).toLocaleString('bn-BD')}</b>`;const saved=store.bookmarks().includes(id);$('#bookmark').textContent=saved?'🔖 সেভ হয়েছে':'🔖 সেভ';$('#rating').innerHTML=[5,4,3,2,1].map(n=>`<button data-rating="${n}" aria-label="${n} তারকা">★</button>`).join('');$('#reader').style.display='block';$('#reader').setAttribute('aria-hidden','false');document.body.style.overflow='hidden'}
+function closeReader(){$('#reader').style.display='none';$('#reader').setAttribute('aria-hidden','true');document.body.style.overflow=''}
+async function patchStory(id,data){const s=state.stories.find(x=>x.id===id);Object.assign(s,data);store.set(state.stories);if(db)try{await db.collection('stories').doc(id).update(data)}catch(e){console.warn(e)}renderStories()}
+async function publish(e){e.preventDefault();if(auth&&!state.user){notify('প্রকাশ করতে আগে লগইন করুন');route('profile');return}const id=db?undefined:'local-'+Date.now();const body=$('#body').value.trim();const s={title:$('#title').value.trim(),chapter:Number($('#chapter').value)||1,category:$('#category').value.trim()||'সাধারণ',cover:$('#cover-url').value.trim(),body,author:state.user?.displayName||state.user?.email||'স্থানীয় লেখক',authorUid:state.user?.uid||'',createdAt:new Date().toISOString(),likes:0,views:0,ratingTotal:0,ratingCount:0};try{if(db){const ref=await db.collection('stories').add(s);s.id=ref.id}else{s.id=id;state.stories.unshift(s);store.set(state.stories)}if(db){state.stories.unshift(s)}$('#story-form').reset();$('#cover-preview').classList.add('hidden');updateMetrics();notify('গল্প সফলভাবে প্রকাশিত হয়েছে ✨');route('home');renderStories()}catch(err){notify('প্রকাশ করা যায়নি: '+err.message)}}
+function renderAuth(){const area=$('#auth-area'),data=$('#profile-data');if(state.user){area.innerHTML='';data.classList.remove('hidden')}else{data.classList.add('hidden');area.innerHTML=`<div class="auth-box glass"><h2>আপনার মাই আইডি</h2><p class="notice">লোকাল মোডে লগইন ছাড়াই গল্প লেখা যায়। Firebase কনফিগার করলে নিরাপদ Email/Password অ্যাকাউন্ট ব্যবহার করুন।</p><form id="auth-form"><input class="field" id="auth-email" type="email" required placeholder="ইমেইল"><input class="field" id="auth-password" type="password" minlength="6" required placeholder="পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)"><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" data-auth="login">লগইন</button><button class="btn secondary" data-auth="signup">সাইন আপ</button></div></form></div>`;$('#auth-form').onsubmit=authSubmit}}
+function renderProfile(){if(!state.user)return;$('#profile-name').textContent=state.user.displayName||'গল্পপ্রেমী';$('#profile-email').textContent=state.user.email||'';$('#avatar').textContent=(state.user.email||'ও')[0].toUpperCase();const mine=state.stories.filter(s=>s.authorUid===state.user.uid);$('#my-stories').innerHTML=mine.length?mine.map(s=>`<div class="list-item"><span>${esc(s.title)}</span><small>${date(s.createdAt)}</small></div>`).join(''):'<span class="muted">এখনও কোনও প্রকাশনা নেই।</span>';renderBookmarks()}
+function renderBookmarks(){const ids=store.bookmarks(),mine=state.stories.filter(s=>ids.includes(s.id));$('#bookmarks').innerHTML=mine.length?mine.map(s=>`<div class="list-item"><button class="secondary" style="border:0;color:inherit;background:none;text-align:left" data-open="${s.id}">${esc(s.title)}</button><small>${date(s.createdAt)}</small></div>`).join(''):'<span class="muted">সেভ করা গল্প এখানে দেখা যাবে।</span>'}
+async function authSubmit(e){e.preventDefault();if(!auth){notify('Firebase কনফিগারেশন না থাকায় লোকাল মোড চালু আছে');return}const email=$('#auth-email').value,password=$('#auth-password').value;try{if(e.submitter.dataset.auth==='signup')await auth.createUserWithEmailAndPassword(email,password);else await auth.signInWithEmailAndPassword(email,password);notify('স্বাগতম!')}catch(err){notify(err.message)}}
+function updateMetrics(){const n=words($('#body').value);$('#word-count').textContent=`শব্দ: ${n.toLocaleString('bn-BD')}`;$('#read-time').textContent=`পড়তে সময়: ${Math.max(1,Math.ceil(n/150)).toLocaleString('bn-BD')} মিনিট`}
+$('#search').oninput=renderStories;$('#sort').onchange=renderStories;$('#body').oninput=updateMetrics;$('#story-form').onsubmit=publish;$('#cover-file').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{$('#cover-url').value=r.result;$('#cover-preview').src=r.result;$('#cover-preview').classList.remove('hidden')};r.readAsDataURL(f)};
+document.addEventListener('click',e=>{const routeBtn=e.target.closest('[data-route]');if(routeBtn){e.preventDefault();route(routeBtn.dataset.route);return}const card=e.target.closest('.card');if(card)openReader(card.dataset.id);const open=e.target.closest('[data-open]');if(open)openReader(open.dataset.open)});
+$('#close-reader').onclick=closeReader;$('#font-up').onclick=()=>{$('#reader-content').style.fontSize=(state.fontSize=Math.min(1.7,state.fontSize+.1))+'rem'};$('#font-down').onclick=()=>{$('#reader-content').style.fontSize=(state.fontSize=Math.max(.85,state.fontSize-.1))+'rem'};$('#support').onclick=()=>$('#support-modal').classList.add('open');$('#close-support').onclick=()=>$('#support-modal').classList.remove('open');$('#support-modal').onclick=e=>{if(e.target.id==='support-modal')e.currentTarget.classList.remove('open')};$('#like').onclick=()=>{if(!state.current)return;state.liked=!state.liked;localStorage.setItem('liked-'+state.current.id,state.liked);patchStory(state.current.id,{likes:Math.max(0,(state.current.likes||0)+(state.liked?1:-1))});openReader(state.current.id)};$('#bookmark').onclick=()=>{const a=store.bookmarks(),i=a.indexOf(state.current.id);i<0?a.push(state.current.id):a.splice(i,1);store.saveBookmarks(a);$('#bookmark').textContent=i<0?'🔖 সেভ হয়েছে':'🔖 সেভ';notify(i<0?'বুকমার্কে সেভ হয়েছে':'বুকমার্ক সরানো হয়েছে');renderProfile()};$('#rating').onclick=async e=>{const n=Number(e.target.dataset.rating);if(!n||!state.current)return;await patchStory(state.current.id,{ratingTotal:(state.current.ratingTotal||0)+n,ratingCount:(state.current.ratingCount||0)+1});notify(`${n} তারকা রেটিং দেওয়া হয়েছে`);openReader(state.current.id)};$('#logout').onclick=()=>auth?.signOut();$('#reader').addEventListener('contextmenu',e=>e.preventDefault());window.onpopstate=()=>route(location.hash.slice(1)||'home');
+loadStories();renderAuth();updateMetrics();route(location.hash.slice(1)||'home');
+</script>
+</body>
+</html>
