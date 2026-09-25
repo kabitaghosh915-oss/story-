@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>আমার গল্প - My Story App</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Bengali -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Firebase Compat CDN -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- ১. হেডার/নেভবার -->
+        <header class="app-header">
+            <div class="header-left">
+                <i class="fas fa-book-open logo-icon"></i>
+                <h1 id="page-title">লাইব্রেরি</h1>
+            </div>
+            <div class="header-right">
+                <button id="theme-toggle" aria-label="Toggle Dark Mode" title="থিম পরিবর্তন">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- ২. মূল কন্টেন্ট এলাকা (পেজ অনুযায়ী পরিবর্তন হবে) -->
+        <main id="content-area" class="content">
+            <!-- JavaScript এখানে কন্টেন্ট লোড করবে -->
+        </main>
+
+        <!-- ৩. বটম নেভিগেশন (ট্যাব বার) -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-page="library" id="nav-library">
+                <i class="fas fa-book-open"></i>
+                <span>লাইব্রেরি</span>
+            </button>
+            <button class="nav-btn" data-page="writer" id="nav-writer">
+                <i class="fas fa-pen-nib"></i>
+                <span>লিখুন</span>
+            </button>
+            <button class="nav-btn" data-page="bookmarks" id="nav-bookmarks">
+                <i class="fas fa-bookmark"></i>
+                <span>বুকমার্ক</span>
+            </button>
+            <button class="nav-btn" data-page="profile" id="nav-profile">
+                <i class="fas fa-user"></i>
+                <span>প্রোফাইল</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- JavaScript ফাইলগুলো লোড করা হচ্ছে -->
+    <script src="js/storage.js"></script>
+    <script src="js/library.js"></script>
+    <script src="js/writer.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/app.js"></script> <!-- app.js সবার শেষে লোড হবে -->
+</body>
+</html>

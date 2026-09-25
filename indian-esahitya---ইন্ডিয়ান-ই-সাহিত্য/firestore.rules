@@ -1,0 +1,90 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Book Series collection
+    match /series/{seriesId} {
+      // Anyone can read series
+      allow read: if true;
+
+      // Authenticated users can create series where authorId matches their UID
+      allow create: if request.auth != null
+        && request.resource.data.authorId == request.auth.uid
+        && request.resource.data.title is string
+        && request.resource.data.views is number
+        && request.resource.data.likes is number
+        && request.resource.data.ratingTotal is number
+        && request.resource.data.ratingCount is number;
+
+      // Authors can modify their own series, or engagement fields can be updated
+      allow update: if (
+        (request.auth != null && resource.data.authorId == request.auth.uid) ||
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'likes', 'ratingTotal', 'ratingCount', 'totalChapters']))
+      );
+
+      // Only the author can delete the series
+      allow delete: if request.auth != null && resource.data.authorId == request.auth.uid;
+    }
+
+    // Chapters collection
+    match /chapters/{chapterId} {
+      // Anyone can read chapters
+      allow read: if true;
+
+      // Authenticated authors can create chapters linked to series
+      allow create: if request.auth != null
+        && request.resource.data.authorUid == request.auth.uid
+        && request.resource.data.seriesId is string
+        && request.resource.data.chapterTitle is string
+        && request.resource.data.content is string;
+
+      // Authors can modify their chapters, or engagement counters can be updated
+      allow update: if (
+        (request.auth != null && resource.data.authorUid == request.auth.uid) ||
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'likes']))
+      );
+
+      // Only the author can delete their chapter
+      allow delete: if request.auth != null && resource.data.authorUid == request.auth.uid;
+    }
+
+    // Stories collection (standalone & legacy)
+    match /stories/{storyId} {
+      // Anyone can read stories
+      allow read: if true;
+      
+      // Authenticated users can create stories where authorUid matches their UID
+      allow create: if request.auth != null
+        && request.resource.data.authorUid == request.auth.uid
+        && request.resource.data.title is string
+        && request.resource.data.body is string
+        && request.resource.data.views is number
+        && request.resource.data.likes is number
+        && request.resource.data.ratingTotal is number
+        && request.resource.data.ratingCount is number;
+        
+      // Authors can modify their own story content, or anyone can update engagement fields
+      allow update: if (
+        (request.auth != null && resource.data.authorUid == request.auth.uid) ||
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'likes', 'ratingTotal', 'ratingCount']))
+      );
+      
+      // Only the author can delete the story
+      allow delete: if request.auth != null && resource.data.authorUid == request.auth.uid;
+    }
+
+    // User profiles collection and private subcollections
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId;
+
+      match /likes/{itemId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /ratings/{itemId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+  }
+}

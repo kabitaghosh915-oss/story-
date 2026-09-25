@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Bharat e-Library - National Digital Library of India</title>
+  <meta name="description" content="Bharat e-Library - Enterprise Cloud-Powered Pan-India Digital Library, Story Books & Series Platform.">
+  <meta property="og:title" content="Bharat e-Library - National Digital Library of India">
+  <meta property="og:description" content="Nation-scale digital library for multi-chapter stories, poetry, and literature across Indian languages.">
+  <meta property="og:type" content="website">
+
+  <!-- Google Fonts for Pan-India Scripts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Sans+Telugu:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome Icons for clean SVG rendering (No emojis) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Firebase v10+ Compat CDN Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</head>
+<body data-theme="dark" data-font-size="md" data-font-style="sans">
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Mobile Viewport Container (Centered App-like Interface) -->
+  <div class="app-viewport">
+
+    <!-- 1. Header Bar -->
+    <header class="app-header">
+      <div class="brand-wrapper" onclick="App.switchTab('view-library')">
+        <div class="brand-icon-box">
+          <i class="fa-solid fa-feather-pointed"></i>
+        </div>
+        <div class="brand-text-col">
+          <span id="app-title-text" class="brand-title">Bharat e-Library</span>
+          <span id="app-tagline-text" class="brand-sub">National Digital Library of India</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Quick Language Button -->
+        <button class="lang-pill-btn" onclick="App.switchTab('view-settings')" title="Select Language">
+          <i class="fa-solid fa-globe"></i>
+          <span id="header-lang-code">EN</span>
+        </button>
+
+        <!-- Auth Button -->
+        <button id="auth-btn" class="auth-header-btn" onclick="App.handleAuthBtnClick()">
+          <i class="fa-regular fa-user"></i>
+          <span id="auth-btn-label">Login</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. Main Content Screens -->
+    <main class="main-content">
+
+      <!-- ==============================================
+           SCREEN A: LIBRARY VIEW
+           ============================================== -->
+      <section id="view-library" class="view active">
+        <!-- Hero Card -->
+        <div class="hero-card">
+          <h2 id="hero-title" class="hero-heading">Celebrating the Rich Literature of India</h2>
+          <p id="hero-sub" class="hero-p">An open digital repository for stories, poetry, and literature across Indian languages.</p>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-wrapper">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input type="text" id="search-input" class="search-input" placeholder="Search by title, author, or keywords...">
+        </div>
+
+        <!-- Sort Segmented Controls -->
+        <div class="sort-tabs-container">
+          <button class="sort-tab-btn active" data-sort="latest" onclick="App.setSort('latest')">
+            <span data-i18n="sortLatest">Latest</span>
+          </button>
+          <button class="sort-tab-btn" data-sort="rating" onclick="App.setSort('rating')">
+            <span data-i18n="sortRating">Top Rated</span>
+          </button>
+          <button class="sort-tab-btn" data-sort="likes" onclick="App.setSort('likes')">
+            <span data-i18n="sortLikes">Popular</span>
+          </button>
+          <button class="sort-tab-btn" data-sort="views" onclick="App.setSort('views')">
+            <span data-i18n="sortViews">Most Read</span>
+          </button>
+        </div>
+
+        <!-- Category Horizontal Filter Bar -->
+        <div class="categories-bar" id="categories-bar">
+          <button class="cat-chip active" data-cat="all" onclick="App.setCategory('all')">
+            <span data-i18n="catAll">All Literature</span>
+          </button>
+          <button class="cat-chip" data-cat="Short Stories" onclick="App.setCategory('Short Stories')">
+            <span data-i18n="catStory">Short Stories</span>
+          </button>
+          <button class="cat-chip" data-cat="Mystery & Thriller" onclick="App.setCategory('Mystery & Thriller')">
+            <span data-i18n="catMystery">Mystery & Thriller</span>
+          </button>
+          <button class="cat-chip" data-cat="Science Fiction" onclick="App.setCategory('Science Fiction')">
+            <span data-i18n="catSciFi">Science Fiction</span>
+          </button>
+          <button class="cat-chip" data-cat="Social" onclick="App.setCategory('Social')">
+            <span data-i18n="catSocial">Social</span>
+          </button>
+          <button class="cat-chip" data-cat="Poetry" onclick="App.setCategory('Poetry')">
+            <span data-i18n="catPoem">Poetry</span>
+          </button>
+          <button class="cat-chip" data-cat="Novellas" onclick="App.setCategory('Novellas')">
+            <span data-i18n="catNovel">Novellas</span>
+          </button>
+          <button class="cat-chip" data-cat="Essays" onclick="App.setCategory('Essays')">
+            <span data-i18n="catEssay">Essays</span>
+          </button>
+        </div>
+
+        <!-- Dynamic Series & Stories Container -->
+        <div id="stories-container">
+          <!-- Populated dynamically via app.js -->
+        </div>
+      </section>
+
+      <!-- ==============================================
+           SCREEN B: WRITER VIEW (NEW BOOK OR ADD CHAPTER)
+           ============================================== -->
+      <section id="view-writer" class="view">
+        <div class="glass-card">
+          <div style="margin-bottom: 16px;">
+            <h2 id="writer-heading" style="font-size: 1.25rem; font-weight: 700; color: var(--text-main);">Create Literature & Chapters</h2>
+            <p id="writer-sub" style="font-size: 0.82rem; color: var(--text-muted);">Start a brand new book series or publish subsequent chapters to your existing books.</p>
+          </div>
+
+          <!-- Writer Mode Selector Tabs: New Book vs Add Chapter -->
+          <div class="writer-mode-selector">
+            <button type="button" id="btn-mode-new-series" class="writer-mode-btn active" onclick="App.setWriterMode('new_series')">
+              <i class="fa-solid fa-book"></i>
+              <span id="label-mode-new-series">Start a New Story/Book</span>
+            </button>
+            <button type="button" id="btn-mode-add-chapter" class="writer-mode-btn" onclick="App.setWriterMode('add_chapter')">
+              <i class="fa-solid fa-plus"></i>
+              <span id="label-mode-add-chapter">Add Chapter to Existing Story</span>
+            </button>
+          </div>
+
+          <form id="writer-form" class="writer-form" onsubmit="App.handleStorySubmit(event)">
+            
+            <!-- OPTION B: Existing Book Selector (Visible only in 'add_chapter' mode) -->
+            <div id="group-existing-book" class="form-group" style="display: none;">
+              <label class="form-label" for="existing-book-select" id="label-existing-book">Select Existing Story / Book</label>
+              <select id="existing-book-select" class="form-select" onchange="App.handleExistingBookChange()">
+                <option value="">-- Choose your existing book --</option>
+              </select>
+              <p id="existing-book-hint" style="font-size: 0.74rem; color: var(--text-dim); margin-top: 2px;">
+                Chapters will be added chronologically under this book.
+              </p>
+            </div>
+
+            <!-- OPTION A: New Book Fields (Hidden in 'add_chapter' mode) -->
+            <div id="group-new-book-fields">
+              <div class="form-group">
+                <label class="form-label" for="story-title" id="label-story-title">Book / Story Title</label>
+                <input type="text" id="story-title" class="form-input" placeholder="Enter a captivating book title">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="story-desc" id="label-story-desc">Book Synopsis / Description</label>
+                <textarea id="story-desc" class="form-input" style="min-height: 70px; resize: vertical;" placeholder="Brief overview of this story series..."></textarea>
+              </div>
+
+              <div style="display: flex; gap: 10px;">
+                <div class="form-group" style="flex: 1;">
+                  <label class="form-label" for="story-category" id="label-story-category">Category</label>
+                  <select id="story-category" class="form-select">
+                    <option value="Short Stories">Short Stories</option>
+                    <option value="Mystery & Thriller">Mystery & Thriller</option>
+                    <option value="Science Fiction">Science Fiction</option>
+                    <option value="Social">Social</option>
+                    <option value="Poetry">Poetry</option>
+                    <option value="Novellas">Novellas</option>
+                    <option value="Essays">Essays</option>
+                  </select>
+                </div>
+
+                <div class="form-group" style="flex: 1;">
+                  <label class="form-label" for="story-cover-image" id="label-story-cover">Cover Image URL (Optional)</label>
+                  <input type="url" id="story-cover-image" class="form-input" placeholder="https://example.com/cover.jpg">
+                </div>
+              </div>
+            </div>
+
+            <!-- Author Display Name -->
+            <div class="form-group">
+              <label class="form-label" for="story-author" id="label-story-author">Author / Pen Name</label>
+              <input type="text" id="story-author" class="form-input" placeholder="Your author pen name" required>
+            </div>
+
+            <!-- Chapter Details (Shared between New Book & Add Chapter) -->
+            <div class="chapter-input-card">
+              <div style="display: flex; gap: 10px; align-items: flex-end;">
+                <div class="form-group" style="width: 100px;">
+                  <label class="form-label" for="chapter-number-input" id="label-chapter-number">Chapter #</label>
+                  <input type="number" id="chapter-number-input" class="form-input" min="1" value="1" required>
+                </div>
+
+                <div class="form-group" style="flex: 1;">
+                  <label class="form-label" for="chapter-title-input" id="label-chapter-title">Chapter Title</label>
+                  <input type="text" id="chapter-title-input" class="form-input" placeholder="e.g. Chapter 1: The Beginning" required>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-top: 12px;">
+                <label class="form-label" for="story-body" id="label-chapter-content">Chapter Content</label>
+                <textarea id="story-body" class="form-textarea" placeholder="Write your chapter text here... (Press enter twice for paragraph break)" required></textarea>
+              </div>
+            </div>
+
+            <div class="writer-stats-bar">
+              <span id="writer-word-count">Word Count: 0</span>
+              <span id="writer-read-time-est">Est. Reading Time: 1 min read</span>
+            </div>
+
+            <button type="submit" id="publish-btn" class="primary-btn">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <span id="publish-btn-text">Publish to Cloud</span>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           SCREEN C: READER VIEW (SERIES CHAPTERS & ANTI-COPY)
+           ============================================== -->
+      <section id="view-reader" class="view">
+        
+        <!-- Reader Top Bar -->
+        <div class="reader-top-bar">
+          <button class="back-btn" onclick="App.handleBackFromReader()">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span id="back-to-lib-text">Back to Library</span>
+          </button>
+
+          <!-- Table of Contents & Font Resizer -->
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button id="reader-toc-btn" class="toc-pill-btn" onclick="App.openTableOfContentsModal()" title="View All Chapters">
+              <i class="fa-solid fa-list-ol"></i>
+              <span id="reader-toc-label">Chapters</span>
+            </button>
+
+            <!-- Font Size Resizer -->
+            <div class="font-resizer-group">
+              <button class="resizer-btn" onclick="App.changeFontSize(-1)" title="Decrease font size">A-</button>
+              <button class="resizer-btn" onclick="App.changeFontSize(1)" title="Increase font size">A+</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Anti-Copy Protected Reading Zone -->
+        <article id="reader-container" class="reader-article reader-secure-zone" oncontextmenu="return false;">
+          
+          <!-- Series & Category Badges -->
+          <div class="reader-header-badges">
+            <span class="category-tag" id="reader-category">Literature</span>
+            <span class="chapter-sequence-badge" id="reader-chapter-seq">Chapter 1 of 1</span>
+          </div>
+
+          <!-- Series Title Subhead -->
+          <div class="reader-series-parent-title" id="reader-series-parent-title">Series Name</div>
+
+          <!-- Chapter Title -->
+          <h1 class="reader-title" id="reader-title">Title</h1>
+
+          <!-- Author Details & Fallback Avatar Row -->
+          <div class="reader-author-bar">
+            <div class="author-avatar-col" id="reader-author-avatar-col">
+              <!-- Avatar image or fallback initials injected via app.js -->
+              <div class="profile-initials-box sm-avatar" id="reader-author-initials">AU</div>
+            </div>
+
+            <div class="author-text-col">
+              <div class="author-display-name" id="reader-author">Author Name</div>
+              <div class="reader-metrics-row">
+                <span title="Estimated Reading Time"><i class="fa-regular fa-clock"></i> <span id="reader-reading-time">3 min read</span></span>
+                <span title="Total Reads"><i class="fa-regular fa-eye"></i> <span id="reader-views">0 Reads</span></span>
+                <span title="Average Rating"><i class="fa-solid fa-star" style="color: var(--star-active);"></i> <span id="reader-rating-summary">0.0 (0)</span></span>
+                <span><i class="fa-regular fa-calendar"></i> <span id="reader-date">Date</span></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Reader Text Body (Copying/Selecting Disabled) -->
+          <div id="reader-body" class="reader-body-text">
+            <!-- Chapter body text injected here -->
+          </div>
+
+          <!-- ADMONETIZATION PLACEHOLDER 1: Between Chapters Ad Placement -->
+          <div class="ad-placeholder-box between-chapters-ad">
+            <div class="ad-header-row">
+              <span class="ad-label"><i class="fa-solid fa-rectangle-ad"></i> <span data-i18n="sponsoredAd">Sponsored / Literature Partner</span></span>
+              <span class="ad-sublabel">Ad Placement</span>
+            </div>
+            <div class="ad-banner-slot">
+              <!-- Google AdSense Container Placeholder -->
+              <div class="ad-banner-inner">
+                <div class="ad-banner-graphic">
+                  <i class="fa-solid fa-book-bookmark"></i>
+                </div>
+                <div class="ad-banner-copy">
+                  <strong>National Digital Book Fest & Publishing Grant</strong>
+                  <p>Discover emerging Indian authors, poetry recitals, and digital storytelling workshops.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chapter Navigation Controls (Previous Chapter / Next Chapter & Selector) -->
+          <div class="chapter-nav-controls" id="chapter-nav-controls">
+            <button id="prev-chapter-btn" class="chapter-nav-btn" onclick="App.goToAdjacentChapter(-1)">
+              <i class="fa-solid fa-chevron-left"></i>
+              <span id="prev-chapter-label">Previous Chapter</span>
+            </button>
+
+            <!-- Jump to Chapter Selector Dropdown -->
+            <div class="chapter-selector-wrapper">
+              <select id="reader-chapter-dropdown" class="chapter-dropdown-select" onchange="App.handleChapterDropdownChange(this.value)">
+                <!-- Populated dynamically via app.js -->
+              </select>
+            </div>
+
+            <button id="next-chapter-btn" class="chapter-nav-btn" onclick="App.goToAdjacentChapter(1)">
+              <span id="next-chapter-label">Next Chapter</span>
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+
+        </article>
+
+        <!-- Engagement Area: Interactive Likes & 1-5 Star Ratings (STRICTLY NO COMMENTS) -->
+        <div class="engagement-panel">
+          <!-- Interactive Like Button (Toggle Like / Unlike) -->
+          <div class="like-action-row">
+            <div>
+              <span id="reader-like-prompt" style="font-size: 0.88rem; font-weight: 600; color: var(--text-main);">Appreciate this creation?</span>
+              <p id="reader-like-subprompt" style="font-size: 0.75rem; color: var(--text-dim);">Tap the heart to like or remove your like</p>
+            </div>
+            <button id="like-btn" class="like-btn" onclick="App.handleLikeToggle()">
+              <i class="fa-solid fa-heart"></i>
+              <span id="like-btn-text">Like 0</span>
+            </button>
+          </div>
+
+          <!-- Interactive Star Rating System (1 to 5 Clickable Stars) -->
+          <div class="rating-section">
+            <div class="rating-header">
+              <span id="reader-rate-label" class="rating-label">Rate this Literature (1 to 5 Stars)</span>
+              <span id="rating-average-display" class="rating-average-badge">Avg: 0.0 / 5</span>
+            </div>
+
+            <div class="star-rating-row" id="star-rating-row">
+              <button type="button" class="star-btn" data-star="1" onclick="App.handleRatingClick(1)" title="1 Star - Ordinary">
+                <i class="fa-solid fa-star"></i>
+              </button>
+              <button type="button" class="star-btn" data-star="2" onclick="App.handleRatingClick(2)" title="2 Stars - Fair">
+                <i class="fa-solid fa-star"></i>
+              </button>
+              <button type="button" class="star-btn" data-star="3" onclick="App.handleRatingClick(3)" title="3 Stars - Good">
+                <i class="fa-solid fa-star"></i>
+              </button>
+              <button type="button" class="star-btn" data-star="4" onclick="App.handleRatingClick(4)" title="4 Stars - Wonderful">
+                <i class="fa-solid fa-star"></i>
+              </button>
+              <button type="button" class="star-btn" data-star="5" onclick="App.handleRatingClick(5)" title="5 Stars - Masterpiece">
+                <i class="fa-solid fa-star"></i>
+              </button>
+            </div>
+
+            <span id="user-rating-status" class="rating-status-text">Click any star button to submit or update your rating</span>
+          </div>
+        </div>
+
+        <!-- ADMONETIZATION PLACEHOLDER 2: Reader Footer Ad Placement -->
+        <div class="ad-placeholder-box footer-ad">
+          <div class="ad-header-row">
+            <span class="ad-label"><i class="fa-solid fa-rectangle-ad"></i> <span data-i18n="sponsoredAd">Sponsored / Literature Partner</span></span>
+            <span class="ad-sublabel">Ad Placement</span>
+          </div>
+          <div class="ad-banner-slot">
+            <div class="ad-banner-inner">
+              <div class="ad-banner-graphic" style="background: linear-gradient(135deg, #059669, #10b981);">
+                <i class="fa-solid fa-graduation-cap"></i>
+              </div>
+              <div class="ad-banner-copy">
+                <strong>Scholarships in Classical & Modern Indian Languages</strong>
+                <p>Support digital literary preservation across Bengali, Hindi, Tamil, Telugu & Marathi literature.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ==============================================
+           SCREEN D: PROFILE VIEW & AUTHOR SHOWCASE
+           ============================================== -->
+      <section id="view-profile" class="view">
+        <div id="profile-container">
+          <!-- Injected dynamically based on Auth state -->
+        </div>
+      </section>
+
+      <!-- ==============================================
+           SCREEN E: SETTINGS SCREEN
+           ============================================== -->
+      <section id="view-settings" class="view">
+        <div class="glass-card" style="margin-bottom: 16px;">
+          <h2 id="settings-title" style="font-size: 1.25rem; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">Settings & Preferences</h2>
+          <p id="settings-sub" style="font-size: 0.82rem; color: var(--text-muted);">Customize language, typography, reading aesthetics, and account settings.</p>
+        </div>
+
+        <!-- 1. Language Selection Grid (Pan-India) -->
+        <div class="glass-card">
+          <div class="settings-section-header">
+            <i class="fa-solid fa-language" style="color: var(--primary);"></i>
+            <span id="settings-lang-heading">Language Selection (Pan-India)</span>
+          </div>
+          <p id="settings-lang-sub" style="font-size: 0.78rem; color: var(--text-dim); margin-bottom: 12px;">Choose your primary interface and reading language.</p>
+
+          <div class="languages-grid" id="languages-grid">
+            <!-- Dynamically populated from I18n.LANGUAGES -->
+          </div>
+        </div>
+
+        <!-- 2. Reading Preferences -->
+        <div class="glass-card">
+          <div class="settings-section-header">
+            <i class="fa-solid fa-sliders" style="color: var(--primary);"></i>
+            <span id="settings-reading-heading">Reading Preferences</span>
+          </div>
+
+          <!-- Font Size -->
+          <div class="preference-row">
+            <div>
+              <div class="pref-label" id="font-size-label">Font Size</div>
+              <div class="pref-sub">Reader typography scale</div>
+            </div>
+            <div class="segmented-choice-group">
+              <button class="segmented-choice-btn" data-size="sm" onclick="App.setReadingFontSize('sm')">Small</button>
+              <button class="segmented-choice-btn active" data-size="md" onclick="App.setReadingFontSize('md')">Medium</button>
+              <button class="segmented-choice-btn" data-size="lg" onclick="App.setReadingFontSize('lg')">Large</button>
+              <button class="segmented-choice-btn" data-size="xl" onclick="App.setReadingFontSize('xl')">XL</button>
+            </div>
+          </div>
+
+          <!-- Font Style -->
+          <div class="preference-row">
+            <div>
+              <div class="pref-label" id="font-style-label">Font Style</div>
+              <div class="pref-sub">Typography family</div>
+            </div>
+            <div class="segmented-choice-group">
+              <button class="segmented-choice-btn active" data-font="sans" onclick="App.setReadingFontStyle('sans')">Sans-Serif</button>
+              <button class="segmented-choice-btn" data-font="serif" onclick="App.setReadingFontStyle('serif')">Serif</button>
+            </div>
+          </div>
+
+          <!-- Reading Theme -->
+          <div class="preference-row">
+            <div>
+              <div class="pref-label" id="theme-label">Reading Theme</div>
+              <div class="pref-sub">Color palette & lighting</div>
+            </div>
+            <div class="segmented-choice-group" style="flex-wrap: wrap;">
+              <button class="segmented-choice-btn active" data-theme="dark" onclick="App.setTheme('dark')">Dark</button>
+              <button class="segmented-choice-btn" data-theme="light" onclick="App.setTheme('light')">Light</button>
+              <button class="segmented-choice-btn" data-theme="sepia" onclick="App.setTheme('sepia')">Sepia</button>
+              <button class="segmented-choice-btn" data-theme="oled" onclick="App.setTheme('oled')">OLED</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Account & Storage Settings -->
+        <div class="glass-card">
+          <div class="settings-section-header">
+            <i class="fa-solid fa-hard-drive" style="color: var(--primary);"></i>
+            <span id="settings-account-heading">Account & Storage</span>
+          </div>
+
+          <div class="preference-row">
+            <div>
+              <div class="pref-label">Clear Offline Storage Cache</div>
+              <div class="pref-sub">Free up device memory & reload latest cloud state</div>
+            </div>
+            <button class="secondary-btn" style="min-height: 36px; padding: 0 12px;" onclick="App.handleClearCache()">
+              <i class="fa-solid fa-trash-can"></i>
+              <span id="clear-cache-text">Clear Cache</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4. Notification Preferences -->
+        <div class="glass-card">
+          <div class="settings-section-header">
+            <i class="fa-solid fa-bell" style="color: var(--primary);"></i>
+            <span id="settings-notif-heading">Notification Preferences</span>
+          </div>
+
+          <div class="preference-row">
+            <div>
+              <div class="pref-label" id="notif-chapters-label">New Releases & Chapters</div>
+              <div class="pref-sub">Receive alerts for new published literature</div>
+            </div>
+            <label class="switch-label">
+              <input type="checkbox" id="notif-releases-check" checked>
+              <span class="slider-toggle"></span>
+            </label>
+          </div>
+
+          <div class="preference-row">
+            <div>
+              <div class="pref-label" id="notif-author-label">Author Updates & Announcements</div>
+              <div class="pref-sub">Get notified about author events & reviews</div>
+            </div>
+            <label class="switch-label">
+              <input type="checkbox" id="notif-authors-check" checked>
+              <span class="slider-toggle"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 5. About & Legal -->
+        <div class="glass-card">
+          <div class="settings-section-header">
+            <i class="fa-solid fa-circle-info" style="color: var(--primary);"></i>
+            <span id="settings-about-heading">About & Legal</span>
+          </div>
+
+          <p style="font-size: 0.82rem; color: var(--text-dim); margin-bottom: 12px;" id="version-text">
+            Version 2.5.0 Enterprise Edition · Built for India
+          </p>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <button class="secondary-btn" style="min-height: 36px;" onclick="App.showInfoModal('Privacy Policy', 'Your privacy is paramount on Bharat e-Library. User data is never shared with third parties. Content published complies with Indian digital media guidelines.')">
+              <span id="privacy-btn-text">Privacy Policy</span>
+            </button>
+            <button class="secondary-btn" style="min-height: 36px;" onclick="App.showInfoModal('Terms of Service', 'Bharat e-Library is an open digital cultural platform. Authors retain complete ownership of their published creative works.')">
+              <span id="terms-btn-text">Terms of Service</span>
+            </button>
+            <button class="secondary-btn" style="min-height: 36px;" onclick="App.showInfoModal('Open Source Licenses', 'Bharat e-Library utilizes Google Firebase, FontAwesome, Google Fonts, and modern web standards under Apache 2.0 & MIT Licenses.')">
+              <span id="licenses-btn-text">Open Source Licenses</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- 3. Fixed Bottom Navigation Bar (4 Universal Tabs) -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-view="view-library" onclick="App.switchTab('view-library')">
+        <i class="fa-solid fa-book-open nav-icon"></i>
+        <span class="nav-label" id="nav-label-home">Home</span>
+      </button>
+
+      <button class="nav-item" data-view="view-writer" onclick="App.switchTab('view-writer')">
+        <i class="fa-solid fa-feather-pointed nav-icon"></i>
+        <span class="nav-label" id="nav-label-write">Write</span>
+      </button>
+
+      <button class="nav-item" data-view="view-profile" onclick="App.switchTab('view-profile')">
+        <i class="fa-solid fa-user nav-icon"></i>
+        <span class="nav-label" id="nav-label-profile">Profile</span>
+      </button>
+
+      <button class="nav-item" data-view="view-settings" onclick="App.switchTab('view-settings')">
+        <i class="fa-solid fa-gear nav-icon"></i>
+        <span class="nav-label" id="nav-label-settings">Settings</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- 4. Table of Contents / Chapters Modal -->
+  <div id="series-toc-modal" class="modal-backdrop">
+    <div class="modal-card toc-modal-card">
+      <button class="modal-close-btn" onclick="App.closeTableOfContentsModal()">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="toc-modal-header">
+        <span class="category-tag" id="toc-series-category">Category</span>
+        <h3 id="toc-series-title" class="toc-series-title">Series Title</h3>
+        <p id="toc-series-desc" class="toc-series-desc"></p>
+        
+        <div class="toc-author-row" id="toc-author-row">
+          <!-- Injected author avatar & name -->
+        </div>
+      </div>
+
+      <div class="toc-list-heading">
+        <span data-i18n="allChapters">All Chapters</span>
+        <span id="toc-chapters-count-badge" class="count-badge">0 Chapters</span>
+      </div>
+
+      <div id="toc-chapters-list" class="toc-chapters-list">
+        <!-- Injected dynamically via app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Authentication Modal (Login / Signup) -->
+  <div id="auth-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <button class="modal-close-btn" onclick="App.closeAuthModal()">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="modal-tabs">
+        <button id="modal-tab-login" class="modal-tab-btn active" onclick="App.switchAuthModalMode('login')">Login</button>
+        <button id="modal-tab-signup" class="modal-tab-btn" onclick="App.switchAuthModalMode('signup')">Create Account</button>
+      </div>
+
+      <div id="auth-error-banner" class="auth-error-banner"></div>
+
+      <form id="auth-form" onsubmit="App.handleAuthSubmit(event)">
+        <div id="name-field-group" class="form-group" style="display: none; margin-bottom: 12px;">
+          <label class="form-label" for="auth-name" id="auth-name-label">Full Name</label>
+          <input type="text" id="auth-name" class="form-input" placeholder="e.g. Dr. Soumik Majumdar">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label class="form-label" for="auth-email" id="auth-email-label">Email Address</label>
+          <input type="email" id="auth-email" class="form-input" placeholder="name@example.com" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label class="form-label" for="auth-password" id="auth-password-label">Password</label>
+          <input type="password" id="auth-password" class="form-input" placeholder="At least 6 characters" required>
+        </div>
+
+        <button type="submit" id="auth-submit-btn" class="primary-btn" style="width: 100%;">
+          <span>Sign In</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6. Edit Profile Modal -->
+  <div id="profile-edit-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <button class="modal-close-btn" onclick="App.closeProfileEditModal()">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 16px;" id="edit-profile-modal-title">Edit Author Profile</h3>
+
+      <form onsubmit="App.handleSaveProfile(event)" class="writer-form">
+        <div class="form-group">
+          <label class="form-label" for="edit-profile-name">Author / Pen Name</label>
+          <input type="text" id="edit-profile-name" class="form-input" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="edit-profile-avatar">Avatar Image URL (Optional)</label>
+          <input type="url" id="edit-profile-avatar" class="form-input" placeholder="https://example.com/avatar.jpg">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="edit-profile-bio">Author Biography</label>
+          <textarea id="edit-profile-bio" class="form-input" style="min-height: 90px; resize: vertical;" placeholder="Tell readers about yourself..."></textarea>
+        </div>
+
+        <button type="submit" id="save-profile-btn" class="primary-btn" style="width: 100%; margin-top: 8px;">
+          <span>Save Changes</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 7. Generic Info Modal (Legal / About) -->
+  <div id="info-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <button class="modal-close-btn" onclick="document.getElementById('info-modal').classList.remove('show')">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <h3 id="info-modal-title" style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 12px;">Notice</h3>
+      <p id="info-modal-body" style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;"></p>
+    </div>
+  </div>
+
+  <!-- Application Logic Scripts -->
+  <script src="i18n.js"></script>
+  <script src="storage.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

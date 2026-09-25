@@ -1,0 +1,8 @@
+{
+  "name": "Indian eSahitya - ইন্ডিয়ান ই সাহিত্য",
+  "description": "ইন্ডিয়ান ই সাহিত্য - ক্লাউড ফায়ারবেস নির্ভর ডিজিটাল বাংলা সাহিত্য ও গল্প পাঠ এবং প্রকাশের প্ল্যাটফর্ম।",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
+

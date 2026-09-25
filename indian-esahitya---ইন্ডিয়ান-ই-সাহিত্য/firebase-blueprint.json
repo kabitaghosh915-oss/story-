@@ -1,0 +1,96 @@
+{
+  "entities": {
+    "Story": {
+      "title": "Story",
+      "description": "A published standalone literary work or legacy story in Bharat e-Library",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier" },
+        "title": { "type": "string", "description": "Title of story", "minLength": 1, "maxLength": 200 },
+        "author": { "type": "string", "description": "Author display name", "minLength": 1, "maxLength": 100 },
+        "category": { "type": "string", "description": "Genre/category", "maxLength": 50 },
+        "body": { "type": "string", "description": "Complete text content", "minLength": 1 },
+        "authorUid": { "type": "string", "description": "Firebase Auth UID" },
+        "authorEmail": { "type": "string", "description": "Author email" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "views": { "type": "number" },
+        "likes": { "type": "number" },
+        "ratingTotal": { "type": "number" },
+        "ratingCount": { "type": "number" }
+      },
+      "required": ["id", "title", "author", "category", "body", "authorUid", "views", "likes", "ratingTotal", "ratingCount"]
+    },
+    "BookSeries": {
+      "title": "BookSeries",
+      "description": "A multi-chapter book or literature series in Bharat e-Library",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier of the book/series" },
+        "title": { "type": "string", "description": "Book or series title", "minLength": 1, "maxLength": 200 },
+        "description": { "type": "string", "description": "Summary or synopsis of the series", "maxLength": 2000 },
+        "coverImage": { "type": "string", "description": "Cover artwork image URL", "maxLength": 1000 },
+        "category": { "type": "string", "description": "Literature category/genre", "maxLength": 60 },
+        "language": { "type": "string", "description": "Language code (e.g. en, bn, hi)", "maxLength": 10 },
+        "authorId": { "type": "string", "description": "Firebase Auth UID of the author" },
+        "authorName": { "type": "string", "description": "Author pen name", "minLength": 1, "maxLength": 100 },
+        "authorPhotoUrl": { "type": "string", "description": "Author profile avatar URL", "maxLength": 1000 },
+        "totalChapters": { "type": "number", "description": "Count of published chapters in this series" },
+        "views": { "type": "number", "description": "Aggregate read count" },
+        "likes": { "type": "number", "description": "Total reader likes" },
+        "ratingTotal": { "type": "number", "description": "Sum of all ratings" },
+        "ratingCount": { "type": "number", "description": "Number of ratings" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "title", "authorId", "authorName", "totalChapters", "views", "likes", "ratingTotal", "ratingCount"]
+    },
+    "Chapter": {
+      "title": "Chapter",
+      "description": "An individual chapter belonging to a Book/Series",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique chapter ID" },
+        "seriesId": { "type": "string", "description": "ID of parent Book/Series" },
+        "chapterNumber": { "type": "number", "description": "Ordinal chapter sequence number (1, 2, 3...)" },
+        "chapterTitle": { "type": "string", "description": "Title of the chapter", "minLength": 1, "maxLength": 200 },
+        "content": { "type": "string", "description": "Full text of the chapter", "minLength": 1 },
+        "readingTimeMin": { "type": "number", "description": "Estimated reading duration in minutes" },
+        "authorUid": { "type": "string", "description": "Author UID" },
+        "authorName": { "type": "string", "description": "Author display name" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "views": { "type": "number" },
+        "likes": { "type": "number" }
+      },
+      "required": ["id", "seriesId", "chapterNumber", "chapterTitle", "content", "authorUid"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Author/reader profile details",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "bio": { "type": "string" },
+        "avatar": { "type": "string" },
+        "joinedDate": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "/series/{seriesId}": {
+      "schema": { "$ref": "#/entities/BookSeries" },
+      "description": "Collection of all published book series"
+    },
+    "/chapters/{chapterId}": {
+      "schema": { "$ref": "#/entities/Chapter" },
+      "description": "Collection of all chapters linked by seriesId"
+    },
+    "/stories/{storyId}": {
+      "schema": { "$ref": "#/entities/Story" },
+      "description": "Collection of all published stories"
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User profiles and authored metadata"
+    }
+  }
+}
